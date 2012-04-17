@@ -1,7 +1,5 @@
 module Neography
   class Rest
-    include HTTParty
-
     attr_accessor :protocol, :server, :port, :directory, :cypher_path, :gremlin_path, :log_file, :log_enabled, :logger, :max_threads, :authentication, :username, :password
 
       def initialize(options=ENV['NEO4J_URL'] || {})
@@ -16,7 +14,8 @@ module Neography
                 :max_threads    => Neography::Config.max_threads,
                 :authentication => Neography::Config.authentication,
                 :username       => Neography::Config.username,
-                :password       => Neography::Config.password}
+                :password       => Neography::Config.password,
+                :http_client    => Neography::Config.http_client }
 
         unless options.respond_to?(:each_pair)
           url = URI.parse(options)
@@ -44,6 +43,7 @@ module Neography
         @max_threads    = init[:max_threads]
         @authentication = Hash.new
         @authentication = {"#{init[:authentication]}_auth".to_sym => {:username => init[:username], :password => init[:password]}} unless init[:authentication].empty?
+        @http_client    = init[:http_client]
       end
 
       def configure(protocol, server, port, directory)
@@ -459,19 +459,19 @@ module Neography
       end
 
        def get(path,options={})
-          evaluate_response(HTTParty.get(configuration + URI.encode(path), options.merge!(@authentication)))
+          evaluate_response(@http_client.get(configuration + URI.encode(path), options.merge!(@authentication)))
        end
 
        def post(path,options={})
-          evaluate_response(HTTParty.post(configuration + URI.encode(path), options.merge!(@authentication)))
+          evaluate_response(@http_client.post(configuration + URI.encode(path), options.merge!(@authentication)))
        end
 
        def put(path,options={})
-          evaluate_response(HTTParty.put(configuration + URI.encode(path), options.merge!(@authentication)))
+          evaluate_response(@http_client.put(configuration + URI.encode(path), options.merge!(@authentication)))
        end
 
        def delete(path,options={})
-          evaluate_response(HTTParty.delete(configuration + URI.encode(path), options.merge!(@authentication)))
+          evaluate_response(@http_client.delete(configuration + URI.encode(path), options.merge!(@authentication)))
        end
 
       def get_id(id)
