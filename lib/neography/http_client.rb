@@ -26,11 +26,14 @@ module Neography
     
     attr_reader :code, :body, :parsed_response
     
-    def intialize(code, body, parsed_response = nil)
+    def initialize(code, body, parsed_response = nil)
       @code, @body, @parsed_response = code, body, parsed_response
       
       if @parsed_response.nil?
-        @parsed_response = JSON.parse(@body)
+        begin
+          @parsed_response = JSON.parse(@body)
+        rescue
+        end
       end
     end
     
